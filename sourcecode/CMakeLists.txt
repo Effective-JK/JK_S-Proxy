@@ -32,6 +32,7 @@ endif(WIN32)
 set(JKL_ProxyDefines ${MPSharedDefines} "_GAME" )
 set(JKL_ProxyMainFiles
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Client.c"
+	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Engine.c"
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Header.h"
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Imports.c"
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Main.c"
