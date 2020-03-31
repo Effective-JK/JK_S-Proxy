@@ -35,11 +35,19 @@ set(JKL_ProxyMainFiles
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Header.h"
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Imports.c"
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Main.c"
+	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Shell.h"
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_SystemCalls.c"
 	"${JKL_ProxyDir}/JKL_Proxy/Proxy_Wrappers.c"
 	)
 source_group("" FILES ${JKL_ProxyMainFiles})
 set(JKL_ProxyFiles ${JKL_ProxyFiles} ${JKL_ProxyMainFiles})
+
+set(JKL_ProxyDetourFiles
+	"${JKL_ProxyDir}/DetourPatcher/DetourPatcher.c"
+	"${JKL_ProxyDir}/DetourPatcher/DetourPatcher.h"
+	)
+source_group("DetourPatcher" FILES ${JKL_ProxyDetourFiles})
+set(JKL_ProxyFiles ${JKL_ProxyFiles} ${JKL_ProxyDetourFiles})
 
 set(JKL_ProxySDKGameFiles
 	"${JKL_ProxyDir}/JKA_SDK/ai.h"
