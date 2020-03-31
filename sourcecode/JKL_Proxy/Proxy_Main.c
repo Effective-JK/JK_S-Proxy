@@ -46,10 +46,14 @@ Q_EXPORT int vmMain(int command, int arg0, int arg1, int arg2, int arg3, int arg
 				proxy.originalDllEntry(&Proxy_systemCall);
 			}
 
+			JKL_EngineAttach(); // Used for Deathspike's and BobaFett's engine fixes
+
 			break;
 		}
 		case GAME_SHUTDOWN: //(int restart)
 		{
+			JKL_EngineDetach();
+
 			if (proxy.jampgameHandle)
 			{
 				// Send the shutdown signal to the original game module and store the response

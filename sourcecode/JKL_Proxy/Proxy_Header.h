@@ -18,6 +18,7 @@
 #define Proxy_GetFunctionAddress(a, b) dlsym(a, b)
 #endif
 
+#include "../DetourPatcher/DetourPatcher.h"
 #include "../JKA_SDK/g_local.h"
 
 #define PROXY_NAME "Jedi Knight Legends Proxy"
@@ -44,10 +45,29 @@ typedef struct Proxy_s {
 	int originalVmMainResponse;
 } Proxy_t ;
 
+typedef struct
+{
+	int				type;
+
+	unsigned char	ip[4];
+	unsigned char	ipx[10];
+
+	unsigned short	port;
+
+} netadr_t;
+
 // Global defines
 extern Proxy_t proxy;
-// Proxy_ClientConnect.c
+// Proxy_Client.c
 void JKL_ClientConnect(int clientNum, qboolean firstTime, qboolean isBot);
+
+// Proxy_Engine.c
+void JKL_EngineAttach(void);
+void JKL_EngineDetach(void);
+void JKL_EngineMessageBoomCheck(const char* zCmd);
+void *JKL_EngineMessageBoom(void);
+void JKL_EngineRcon(netadr_t from, /*msg_t*/ void* msg);
+void JKL_EngineDownload( /*client_t*/ void* cl);
 
 // Proxy_Imports.c
 char *QDECL va(const char* format, ...);

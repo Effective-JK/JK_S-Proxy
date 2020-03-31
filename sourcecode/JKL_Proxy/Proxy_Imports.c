@@ -56,3 +56,77 @@ int Q_vsnprintf(char* str, size_t size, const char* format, va_list ap)
 	return retval;
 }
 #endif 
+
+/*
+=============
+Q_stricmpn
+OS-independant function to compare strings to each other. 
+You can also compare the beginning of any string with this function.
+=============
+*/
+
+int Q_stricmpn(const char* s1, const char* s2, int n)
+{
+	int		c1, c2;
+
+	if (s1 == NULL)
+	{
+		if (s2 == NULL)
+		{
+			return 0;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+	else if (s2 == NULL)
+	{
+		return 1;
+	}
+
+	do
+	{
+		c1 = *s1++;
+		c2 = *s2++;
+
+		if (!n--)
+		{
+			return 0;
+		}
+
+		if (c1 != c2)
+		{
+			if (c1 >= 'a' && c1 <= 'z')
+			{
+				c1 -= ('a' - 'A');
+			}
+
+			if (c2 >= 'a' && c2 <= 'z')
+			{
+				c2 -= ('a' - 'A');
+			}
+
+			if (c1 != c2)
+			{
+				return c1 < c2 ? -1 : 1;
+			}
+		}
+
+	} while (c1);
+
+	return 0;
+}
+
+/*
+=============
+Q_stricmp
+A simple wrapper for the Q_stricmpn function which will basically compare 
+everything inside the passed strings rather then the number of it.
+=============
+*/
+
+int Q_stricmp(const char* s1, const char* s2)
+{
+	return (s1 && s2) ? Q_stricmpn(s1, s2, 99999) : -1;
+}
