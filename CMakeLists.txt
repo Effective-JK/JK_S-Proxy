@@ -19,15 +19,17 @@
 cmake_minimum_required(VERSION 3.1)
 
 # For checks in subdirectories
-set(InJKL_Proxy TRUE)
+set(InJKA_Proxy TRUE)
 
 # Project name
-set(ProjectName "JKL_Proxy" CACHE STRING "Project Name")
+set(ProjectName "JKA_Proxy" CACHE STRING "Project Name")
 project(${ProjectName})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-option(BuildJKL_Proxy "Whether to create projects for the JKL_Proxy library (jampgame)" ON)
+option(BuildJKA_Proxy "Whether to create projects for the JK Server Proxy library (jampgame)" ON)
+option(JKA_ProxyDetour "Proxy will use DeathSpike's and BobaFett's detouring system" OFF)
+option(JKA_ProxyUseNewAPI "Proxy will use new API (only for mods that have GetModuleAPI)" OFF)
 
 # Configure the use of bundled libraries.  By default, we assume the user is on
 # a platform that does not require any bundling.
@@ -106,10 +108,10 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 message(STATUS "Git revision is ${GIT_SHA1}")
 
 # Binary names
-set(JKL_Proxy "jampgame${Architecture}")
+set(JKA_Proxy "jampgame${Architecture}")
 
 # Paths
-set(JKL_ProxyDir "${CMAKE_SOURCE_DIR}/sourcecode/")
+set(JKA_ProxyDir "${CMAKE_SOURCE_DIR}/sourcecode")
 
 # Operating settings
 if(WIN64)
@@ -131,7 +133,12 @@ if(MSVC)
 	set(SharedDefines ${SharedDefines} "_SCL_SECURE_NO_WARNINGS")
 	set(SharedDefines ${SharedDefines} "_CRT_NONSTDC_NO_DEPRECATE")
 
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /EHsc /arch:SSE2 /sdl /Ot /Gy /TC")
+	if (NOT WIN64)
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /arch:SSE2")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE2")
+	endif()
+
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /EHsc /sdl /Ot /Gy /TP /W4")
 	
 	# Configure MSVC Runtime
 	include(MSVCRuntime)
@@ -141,7 +148,7 @@ if(MSVC)
 	configure_msvc_runtime()
 
 	# We don't try to control symbol visibility under MSVC.
-	set(JKL_Proxy_VISIBILITY_FLAGS "")
+	set(JKA_Proxy_VISIBILITY_FLAGS "")
 
 elseif (("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_C_COMPILER_ID}" STREQUAL "Intel") OR ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang"))
 	# I hope this doesn't come back to bite me in the butt later on.
@@ -152,7 +159,7 @@ elseif (("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_C_COMPILER_ID}" S
 	# ZLib explicitly declares symbols hidden, rather than defaulting to hidden.
 	#
 	# Note that -fvisibility=hidden is stronger than -fvisibility-inlines-hidden.
-	set(JKL_Proxy_VISIBILITY_FLAGS "-fvisibility=hidden")
+	set(JKA_Proxy_VISIBILITY_FLAGS "-fvisibility=hidden")
 
 	# removes the -rdynamic flag at linking (which causes crashes for some reason)
 	set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
@@ -166,6 +173,9 @@ elseif (("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_C_COMPILER_ID}" S
 		if (("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU") OR ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang"))
 			set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse2")
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse2")
+			
+			set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -masm=intel") 
+            set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -masm=intel")
 		endif()
 	endif()
 
@@ -248,6 +258,14 @@ else()
 		set(SharedDefines ${SharedDefines} "FINAL_BUILD")
 endif()
 
+# Settings
+if(JKA_ProxyDetour)
+	set(SharedDefines ${SharedDefines} "PROXY_DETOUR")
+endif()
+if(JKA_ProxyUseNewAPI)
+	set(SharedDefines ${SharedDefines} "PROXY_USENEWAPI")
+endif()
+
 # https://reproducible-builds.org/specs/source-date-epoch/
 if (NOT ("$ENV{SOURCE_DATE_EPOCH}" STREQUAL ""))
 	execute_process(COMMAND "date"
@@ -259,4 +277,4 @@ if (NOT ("$ENV{SOURCE_DATE_EPOCH}" STREQUAL ""))
 endif()
 
 # Add projects
-add_subdirectory(${JKL_ProxyDir})
+add_subdirectory(${JKA_ProxyDir})

@@ -1,4 +1,14 @@
-#include "../JKL_Proxy/Proxy_Header.h"
+// ==========================
+// Jedi Academy Server Proxy
+// --------------------------
+// File: Proxy_Imports.c
+// 
+// Special thanks to Yberion,
+// Zylden, DeathSpike and 
+// BobaFett.
+// ==========================
+
+#include "../JKA_Proxy/Proxy_Header.hpp"
 
 /*
 ============
@@ -11,12 +21,12 @@ FIXME: make this buffer size safe someday
 #define	MAX_VA_STRING	32000
 #define MAX_VA_BUFFERS	4
 
-char* QDECL va(const char* format, ...)
+char *QDECL va( const char *format, ... )
 {
 	va_list		argptr;
 	static char	string[MAX_VA_BUFFERS][MAX_VA_STRING];	// in case va is called by nested functions
 	static int	index = 0;
-	char* buf;
+	char 		*buf;
 
 	va_start(argptr, format);
 	buf = (char*)&string[index++ & 3];
@@ -34,7 +44,7 @@ Special wrapper function for Microsoft's broken _vsnprintf() function.
 MinGW comes with its own snprintf() which is not broken.
 =============
 */
-int Q_vsnprintf(char* str, size_t size, const char* format, va_list ap)
+int Q_vsnprintf( char *str, size_t size, const char *format, va_list ap )
 {
 	int retval;
 
@@ -65,9 +75,9 @@ You can also compare the beginning of any string with this function.
 =============
 */
 
-int Q_stricmpn(const char* s1, const char* s2, int n)
+int Q_stricmpn( const char *s1, const char *s2, int n )
 {
-	int		c1, c2;
+	int	c1, c2;
 
 	if (s1 == NULL)
 	{
@@ -126,7 +136,7 @@ everything inside the passed strings rather then the number of it.
 =============
 */
 
-int Q_stricmp(const char* s1, const char* s2)
+int Q_stricmp( const char *s1, const char *s2 )
 {
 	return (s1 && s2) ? Q_stricmpn(s1, s2, 99999) : -1;
 }

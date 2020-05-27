@@ -11,8 +11,16 @@
 // https://github.com/Deathspike/JMPProxy
 // ==================================================
 
-#include "../JKL_Proxy/Proxy_Header.h"
-#include "../JKL_Proxy/Proxy_Shell.h"
+// >>>>>>>>>>>>>>>>>>>>>>>>>><><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+// IMPORTANT: This file is just an example. It is not used as
+// it's inteded to run using OpenJKded.
+// Proxy_Shell, and DetourPatcher have been modified.
+// NEEDS TO BE FIXED before being used.
+// >>>>>>>>>>>>>>>>>>>>>>>>>><><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+#if 0
+#include "../JKA_Proxy/Proxy_Header.hpp"
+#include "../JKA_Proxy/Proxy_Shell.hpp"
 
 // ==================================================
 // D E T O U R E D   F U N C T I O N S
@@ -42,17 +50,17 @@
 // operating system.
 // ==================================================
 
-char* (*pCmd_Argv)(int);
-char* (*pNET_AdrToString)(netadr_t);
+char *(*pCmd_Argv)(int);
+char *(*pNET_AdrToString)(netadr_t);
 
 // ==================================================
 // These are the trampoline locations to run the
 // original functions which have been intercepted.
 // ==================================================
 
-void (*pSVC_RemoteRcon)(netadr_t from, /*msg_t*/ void* msg);
-void (*pSV_BeginDownload_f)( /*client_t*/ void* cl);
-unsigned char* pMessageBoom;
+void (*pSVC_RemoteRcon)(netadr_t from, /*msg_t*/ void *msg);
+void (*pSV_BeginDownload_f)( /*client_t*/ void *cl);
+unsigned char *pMessageBoom;
 
 // ==================================================
 // These are child functions and aren't correct at
@@ -63,7 +71,7 @@ unsigned char* pMessageBoom;
 int (*pG_FilterPacket)(char*);
 
 // ==================================================
-// JKL_EngineAttach
+// Proxy_EngineAttach
 // --------------------------------------------------
 // Attach all the engine functions, shouldn't be very
 // long without these detours. This allows me to detour
@@ -71,15 +79,15 @@ int (*pG_FilterPacket)(char*);
 // options, features or fixes.
 // ==================================================
 
-void JKL_EngineAttach(void)
+void Proxy_EngineAttach(void)
 {
 	// Detoured Functions	
-	pSVC_RemoteRcon = (void (*)(netadr_t, void*))	Attach((unsigned char*)SVC_RemoteCommand, (unsigned char*)&JKL_EngineRcon);
-	pSV_BeginDownload_f = (void (*)(void*))			Attach((unsigned char*)SV_BeginDownload_f, (unsigned char*)&JKL_EngineDownload);
-	pMessageBoom = Attach((unsigned char*)SV_MessageBoom, (unsigned char*)JKL_EngineMessageBoom());
+	pSVC_RemoteRcon = (void (*)(netadr_t, void*))	Attach((unsigned char*)SVC_RemoteCommand, (unsigned char*)&Proxy_EngineRcon);
+	pSV_BeginDownload_f = (void (*)(void*))			Attach((unsigned char*)SV_BeginDownload_f, (unsigned char*)&Proxy_EngineDownload);
+	pMessageBoom = Attach((unsigned char*)SV_MessageBoom, (unsigned char*)Proxy_EngineMessageBoom());
 
 	// Imported Functions
-	pCmd_Argv = (char* (*)(int)) Cmd_Argv;
+	pCmd_Argv = (char *(*)(int)) Cmd_Argv;
 	pNET_AdrToString = (char* (*)(netadr_t)) NET_AdrToString;
 
 	// Child Functions
@@ -91,7 +99,7 @@ void JKL_EngineAttach(void)
 }
 
 // ==================================================
-// JKL_EngineDetach
+// Proxy_EngineDetach
 // --------------------------------------------------
 // We are closing and we should remove the detour,
 // otherwise the jump might be done to an undefined
@@ -99,7 +107,7 @@ void JKL_EngineAttach(void)
 // anymore.
 // ==================================================
 
-void JKL_EngineDetach(void)
+void Proxy_EngineDetach( void )
 {
 	Detach((unsigned char*)SVC_RemoteCommand, (unsigned char*)pSVC_RemoteRcon);
 	Detach((unsigned char*)SV_BeginDownload_f, (unsigned char*)pSV_BeginDownload_f);
@@ -107,7 +115,7 @@ void JKL_EngineDetach(void)
 }
 
 // ==================================================
-// JKL_EngineMessageBoomCheck && JKL_EngineMessageBoom
+// Proxy_EngineMessageBoomCheck && Proxy_EngineMessageBoom
 // --------------------------------------------------
 // Check for potential dangerous command coming in
 // through a connectionless packet, filter if
@@ -119,10 +127,10 @@ void JKL_EngineDetach(void)
 // Credits: BobaFett
 // ==================================================
 
-void JKL_EngineMessageBoomCheck(const char* zCmd)
+void Proxy_EngineMessageBoomCheck( const char *zCmd )
 {
-	int	  bNotConnect = qtrue;
-	char* s;
+	int		bNotConnect = qtrue;
+	char	*s;
 
 	if (Q_stricmp(zCmd, "getstatus") == 0 || Q_stricmp(zCmd, "getinfo") == 0 || (bNotConnect = Q_stricmp(zCmd, "connect")) == 0)
 	{
@@ -135,13 +143,13 @@ void JKL_EngineMessageBoomCheck(const char* zCmd)
 	}
 }
 
-void* JKL_EngineMessageBoom(void)
+void *Proxy_EngineMessageBoom( void )
 {
 	__sh_Prologue;
 	{
 		__asm1__(pushad)
 			__asm1__(push	ebx)
-			__asm1__(call	JKL_EngineMessageBoomCheck)
+			__asm1__(call	Proxy_EngineMessageBoomCheck)
 			__asm2__(add	esp, 4)
 			__asm1__(popad)
 			__asm1__(jmp	Q_stricmp)
@@ -150,7 +158,7 @@ void* JKL_EngineMessageBoom(void)
 }
 
 // ==================================================
-// JKL_EngineRcon
+// Proxy_EngineRcon
 // --------------------------------------------------
 // An rcon command is being issued, but usually the
 // time-limit check is done before password inspection.
@@ -158,10 +166,10 @@ void* JKL_EngineMessageBoom(void)
 // http://aluigi.altervista.org/papers/multircon.zip
 // ==================================================
 
-void JKL_EngineRcon(netadr_t from, /*msg_t*/ void* msg)
+void Proxy_EngineRcon( netadr_t from, /*msg_t*/ void *msg )
 {
-	cvar_t* pSV_RconPassword = *(cvar_t**)SV_RconPassword;
-	char* zIP = pNET_AdrToString(from);
+	cvar_t 		*pSV_RconPassword = *(cvar_t**)SV_RconPassword;
+	char *zIP =  pNET_AdrToString(from);
 	static int	 iAttempt = 0;
 	static int	 iStoredIP[4];
 	int			 iIP[4];
@@ -230,7 +238,7 @@ void JKL_EngineRcon(netadr_t from, /*msg_t*/ void* msg)
 }
 
 // ==================================================
-// JKL_EngineDownload
+// Proxy_EngineDownload
 // --------------------------------------------------
 // A download is requested but is not being checked
 // for validity. We shall do this before allowing it.
@@ -238,10 +246,11 @@ void JKL_EngineRcon(netadr_t from, /*msg_t*/ void* msg)
 // http://aluigi.altervista.org/poc/q3dirtrav.zip
 // ==================================================
 
-void JKL_EngineDownload( /*client_t*/ void* cl)
+void Proxy_EngineDownload( /*client_t*/ void *cl )
 {
-	char* pFile = pCmd_Argv(1);
+	char *pFile = pCmd_Argv(1);
 
+	// We avoid the client downloading files with any other extension than .pk3
 	if (pFile == NULL || strlen(pFile) < 5 || Q_stricmpn(pFile + strlen(pFile) - 5, ".pk3", 4))
 	{
 		return;
@@ -249,4 +258,4 @@ void JKL_EngineDownload( /*client_t*/ void* cl)
 
 	pSV_BeginDownload_f(cl);
 }
-
+#endif
